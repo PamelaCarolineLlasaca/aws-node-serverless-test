@@ -1,0 +1,121 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: pamelallasacaramos
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: serverless-test
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: aws-node-serverless
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-west-2
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+      - dynamodb:*
+      Resource: 
+      - arn:aws:dynamodb:us-west-2:715841356499:table/Model
+
+functions:
+
+  createModel:
+    handler: src/crud-by-dynamodb/createModel.createModel
+    events:
+      - httpApi:
+          path: /create
+          method: post
+
+  getModels:
+    handler: src/crud-by-dynamodb/getModels.getModels
+    events:
+      - httpApi:
+          path: /get
+          method: get
+
+  getModel:
+    handler: src/crud-by-dynamodb/getModel.getModel
+    events:
+      - httpApi:
+          path: /get/{id}
+          method: get
+
+  updateModel:
+    handler: src/crud-by-dynamodb/updateModel.updateModel
+    events:
+      - httpApi:
+          path: /update/{id}
+          method: put
+
+  deleteModel:
+    handler: src/crud-by-dynamodb/deleteModel.deleteModel
+    events:
+      - httpApi:
+          path: /delete/{id}
+          method: delete
+
+  getPeople:
+    handler: src/swapi/controllers/peopleController.getPeople
+    events:
+      - httpApi:
+          path: /getPeople
+          method: get
+
+  getPlanets:
+    handler: src/swapi/controllers/planetController.getPlanets
+    events:
+      - http:
+          path: /planets
+          method: get
+          request:
+            parameters:
+              querystrings:
+                page: false
+                name: false 
+
+  getPlanetById:
+      handler: src/swapi/controllers/planetController.getPlanetById
+      events:
+        - http:
+            path: /planets/{id}
+            method: get
+            request:
+              parameters:
+                paths:
+                  id: true
+
+  getVehicles:
+      handler: src/swapi/controllers/vehicleController.getVehicles
+      events:
+        - http:
+            path: /vehicles
+            method: get
+            request:
+              parameters:
+                querystrings:
+                  page: false
+                  name: false
+
+  getVehicleById:
+    handler: src/swapi/controllers/vehicleController.getVehicleById
+    events:
+      - http:
+          path: /vehicles/{id}
+          method: get
+          request:
+            parameters:
+              paths:
+                id: true
+
+resources:
+  Resources:
+    Model:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Model
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
